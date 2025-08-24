@@ -6,6 +6,48 @@ commentsPlugin = {import:comments-plugin}
 $meta // Used for browser tab title, social media sharing 'card', search engines, community generator listing, etc.
   title = Nero's AI Image Generator
   description = 18+ ONLY! Uncensored AI. AI text to image generator. If you're looking to create images with hq naked men, this is the generator to use. It's free! Generate AI art from text, completely free, online, no login or sign-up, no daily credit limits/restrictions/gimmicks, and it's fast. Feel free to play around and unleash AI's inner artist. Use this AI to generate high quality art, photos, cartoons, drawings, anime, thumbnails, pfps, and more. Create OCs, anime characters, sexy AI villains, fanfic artwork, and pretty much anything else. It's an AI-based image generator that uses the Stable Diffusion text-to-image model. No watermark, no signup/login, unlimited images. Choose a "style" and then describe exactly what you want to see.. then click GENERATE.There are no limits..no subscriptions..no fees..no censors.. just boundless freedom here!
+  html = <style>
+  @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap');
+
+  body {
+    background-color: #121212;
+    color: #FFFFFF;
+    font-family: 'Roboto', sans-serif;
+  }
+
+  #main-container {
+    background-color: #1E1E1E;
+    border-radius: 10px;
+    padding: 20px;
+    margin-bottom: 20px;
+    box-shadow: 0 4px 8px 0 rgba(0,0,0,0.2);
+  }
+
+  .t2i-input, .t2i-select, .t2i-button {
+    background-color: #333333;
+    color: #FFFFFF;
+    border: 1px solid #FFFF00;
+    border-radius: 5px;
+    padding: 10px;
+    width: 100%;
+    box-sizing: border-box;
+  }
+
+  .t2i-button {
+    background-color: #FFFF00;
+    color: #121212;
+    font-weight: bold;
+    cursor: pointer;
+  }
+
+  .t2i-button:hover {
+    background-color: #E6E600;
+  }
+
+  a {
+    color: #FFFF00;
+  }
+</style>
 
 settings
   pageTitle = NERO'S IMAGE GENERATOR <br><font size=1>(18+ Only - Can produce explicit images)</font size=1>
@@ -61,19 +103,23 @@ settings
       type = select
       remember = true
       options
-        Bauhaus
+        Artistic Styles
+          Bauhaus
           prompt = [input.description], Bauhaus
           negative = [input.negative]
-        infographic drawing
+        Modern & Abstract
+          infographic drawing
           prompt = infographic about: [input.description]
           negative = [input.negative]
-        Captivating Portrait
+        Miscellaneous
+          Captivating Portrait
           prompt = Captivating portrait of [input.description], Captivating photography, immortalized by the powerful lens of the Nikon Z9 camera, reveals exceptional clarity and stunning realism, showcasing every detail, The photo offers a view from below, presenting the silhouette of the protagonist, The protagonist's face is captured with incredible precision, detailing unique features
           negative = [input.negative], cartoon, drawing, 2d, 3d render, airbrushed, anime, illustration, drawing,  unrealistic skin
         Blacklight
           prompt = [input.description], Blacklight
           negative = [input.negative]
-        Bnaked 40yo masculine bodybuilder
+        NSFW
+          Bnaked 40yo masculine bodybuilder
           prompt = [input.description]studio lighting, Highly detailed photo of a naked 40yo masculine bodybuilder, (full body shot), ( GS-Masculine:1.1), (large erect penis1.2), large penis glans, (testicles), HairyAlpha, 3/4 angle, (buzzcut:1.2), sitting in an indoor pool, legs spread open, (dark atmosphere:1.1), burly, beard, bushy mustache, tanned skin, (dim lighting), (white tiles), modern indoor pool, backroom, liminal space, wet skin, (legs in water), (extreme body hair:1.2), big muscular thighs, relaxed pose, (handsome face), <lora:HairyAlpha:1> <lora:muscle_slider_v1:4> <lora:adam_TGIRL_e16_n32:.6>
           negative = [input.negative]GS-DeFeminize-neg:1.3, smile, Unspeakable-Horrors-Composition-4v, low angle, BadDream UnrealisticDream JuggernautNegative-neg bad-hands-5, pants, two penises, cross eyed
         Layered Paper
@@ -97,7 +143,23 @@ settings
         Dynamic Pose (Evil)
           prompt = [input.description] in  dynamic pose, low angle, exaggerated perspectives in the style of anton fadeev morbid, grim dark, dark, very detailed, rendered in octane, dense atmospheric, epic, dramatic, photorealistic, hyper ornate details, 4k, benedick bana, zhang jingna
           negative = [input.negative]
-        Persephone In Space
+        Public Shower
+          prompt = [input.description], two men in a steamy public shower, water droplets on skin, muscular bodies, suggestive glances, cinematic lighting
+          negative = [input.negative], female, clothed, unrealistic, blurry, cartoon, child, deformed
+        After the Match
+          prompt = [input.description], post-game locker room, two sweaty athletes, towels around their waists, homoerotic tension, steam rising from the showers
+          negative = [input.negative], female, clothed, unrealistic, blurry, cartoon, child, deformed
+        Toga Party
+          prompt = [input.description], ancient Roman toga party, two men in revealing togas, reclining on couches, feeding each other grapes, intimate whispers, soft candlelight
+          negative = [input.negative], female, modern clothing, bright lighting, cartoon, child
+        Forbidden Library
+          prompt = [input.description], late at night in a grand library, two scholars, one reaching for a book on a high shelf, the other steadying him from behind, their hands touch, intense eye contact
+          negative = [input.negative], female, bright lighting, modern library, cartoon, child
+        Artist's Muse
+          prompt = [input.description], an artist's studio, a handsome male model posing nude for a painting, the artist's intense gaze on his subject, charcoal sketches scattered on the floor
+          negative = [input.negative], female, clothed, unrealistic, blurry, cartoon, child, deformed
+        Fantasy & Sci-Fi
+          Persephone In Space
           prompt = [input.description], pixar disney animation, octane render sculpted, ethereal form a juxtaposition of delicate grace and captivating strength, luminescent presence that illuminates the void, celestial radiance, stardust and nebulae, flowing gown, fashioned from cosmic fabric, billows gracefully, resembling the swirling galaxies and constellations, It trails behind, leaving a mesmerizing trail of stardust, illustration, blender, 3d render
           negative = [input.negative]
         Diagrammatic drawing
@@ -124,7 +186,8 @@ settings
         Evil
           prompt = [input.description], room and atmosphere feel: evil, dark, hyperrealistic, unsettling, eerie, glowing, demonic, dark reds
           negative = [input.negative], cartoon, drawing, 2d, 3d render, airbrushed, anime, illustration, drawing,  unrealistic skin, vagina, female, clitoris, deformed penis, small penis, double penis, transgender
-        Style of Neal Adams
+        Comic & Cartoon
+          Style of Neal Adams
           prompt = [input.description] in the style of Neal Adams, Deliberate 2.0, Illustration Comic, DC Comics, Marvel, Cover Art USA
           negative = [input.negative]
         flat design poster
