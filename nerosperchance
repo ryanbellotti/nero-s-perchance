@@ -1,0 +1,297 @@
+generateHTML = {import:t2i-framework-plugin-v2}  // <-- this is a little DIY 'framework' plugin that itself importes the text-to-image plugin and generates the user interface using the settings below
+commentsPlugin = {import:comments-plugin}
+// Feel free to edit the settings below and then save your own copy of this generator!
+// You'll probably just want to scroll down to the artStyle list and edit those - it's pretty self-explanatory, just follow the format.
+
+$meta // Used for browser tab title, social media sharing 'card', search engines, community generator listing, etc.
+  title = Nero's AI Image Generator
+  description = 18+ ONLY! Uncensored AI. AI text to image generator. If you're looking to create images with hq naked men, this is the generator to use. It's free! Generate AI art from text, completely free, online, no login or sign-up, no daily credit limits/restrictions/gimmicks, and it's fast. Feel free to play around and unleash AI's inner artist. Use this AI to generate high quality art, photos, cartoons, drawings, anime, thumbnails, pfps, and more. Create OCs, anime characters, sexy AI villains, fanfic artwork, and pretty much anything else. It's an AI-based image generator that uses the Stable Diffusion text-to-image model. No watermark, no signup/login, unlimited images. Choose a "style" and then describe exactly what you want to see.. then click GENERATE.There are no limits..no subscriptions..no fees..no censors.. just boundless freedom here!
+
+settings
+  pageTitle = NERO'S IMAGE GENERATOR <br><font size=1>(18+ Only - Can produce explicit images)</font size=1>
+  introMessage = "Set inputs and click generate to begin." <br> <BR><a href=https://discord.com/invite/dQykEP4R>Click here to join our Discord</a href>
+  numImages = [Number(input.numImages)]
+  socialFeatures = enabled // or 'button' or 'enabled' or 'disabled'
+
+  // note: the t2i-framework-plugin makes all user inputs from the `userInputs` list accessible by name as [input.theNameOfTheInput], as shown here:
+  imageOptions // <-- options for the text-to-image plugin that generates the images: https://perchance.org/text-to-image-plugin
+    saveTitle = ([input.artStyle.getName]) [input.description] // .getName is a built-in Perchance property that gets the name of a given list/sublist/node
+    prompt = [input.artStyle.prompt]
+    negativePrompt = [input.artStyle.negative]
+    resolution = [input.shape]
+
+  userInputs // you can add more user inputs to this list, and then use them like [input.nameOfInput] in the `prompt`, `negativePrompt`, `artStyle.prompt`, etc.
+
+    scratchpad // Note: the 'remember' option storage is 'based on' this 'scratchpad' name, so if you change that name to something else like 'notepad', people will lose all their saved scratchpad text. But it's safe to change the 'label', below.
+      label = scratchpad
+      tip = [t2i.defaultText.scratchpadTip] // this loads the default text, but you can delete it and add your own tip. Just change this line to "tip = You own cool tips."
+      type = paragraph
+      remember = true // <-- the text that the user inputs will be remembered so it's still there even if they close/refresh the page
+      width = min(750px, 100%)
+      height = 30vh
+      takesUpFullRow = true
+      foldToggleState = hidden // or 'shown' if you want it to start shown, or delete this line if you don't want it to be show-able/hide-able
+      visible() =>
+        return Number(localStorage.generateClickCount) > 1; // so the scratchpad only shows up after they've clicked generate a couple of times (to reduce confusion/clutter for newbies)
+      examples
+        [t2i.defaultText.scratchpadPlaceholder]
+
+    description
+      label = description
+      tip = [t2i.defaultText.promptTip]
+      type = paragraph
+      width = min(750px, 100%)
+      takesUpFullRow = true
+      modifiers = [input.artStyle?.modifiers || null]
+      modifierUpdates = event:description.input, event:artStyle.change
+      enterKeyTriggersGeneration = true // <-- can still use shift+enter to create a new line
+      // we use artstyle-specific random prompts if available, otherwise fall back to randomDescriptions list:
+      examples = [input.artStyle?.randomPrompt || randomDescription] // <-- the placeholder examples that rotate in the text box
+      random = [input.artStyle?.randomPrompt || randomDescription] // <-- added to the text box when the 'random' button gets clicked
+
+    negative
+      label = negative prompt<i> <font size=1>(optional)</i></font size=1>
+      tip = [t2i.defaultText.negativePromptTip]
+      type = text
+      examples
+        things you DON'T want in the image
+
+    artStyle
+      label = art style
+      type = select
+      remember = true
+      options
+        Bauhaus
+          prompt = [input.description], Bauhaus
+          negative = [input.negative]
+        infographic drawing
+          prompt = infographic about: [input.description]
+          negative = [input.negative]
+        Captivating Portrait
+          prompt = Captivating portrait of [input.description], Captivating photography, immortalized by the powerful lens of the Nikon Z9 camera, reveals exceptional clarity and stunning realism, showcasing every detail, The photo offers a view from below, presenting the silhouette of the protagonist, The protagonist's face is captured with incredible precision, detailing unique features
+          negative = [input.negative], cartoon, drawing, 2d, 3d render, airbrushed, anime, illustration, drawing,  unrealistic skin
+        Blacklight
+          prompt = [input.description], Blacklight
+          negative = [input.negative]
+        Bnaked 40yo masculine bodybuilder
+          prompt = [input.description]studio lighting, Highly detailed photo of a naked 40yo masculine bodybuilder, (full body shot), ( GS-Masculine:1.1), (large erect penis1.2), large penis glans, (testicles), HairyAlpha, 3/4 angle, (buzzcut:1.2), sitting in an indoor pool, legs spread open, (dark atmosphere:1.1), burly, beard, bushy mustache, tanned skin, (dim lighting), (white tiles), modern indoor pool, backroom, liminal space, wet skin, (legs in water), (extreme body hair:1.2), big muscular thighs, relaxed pose, (handsome face), <lora:HairyAlpha:1> <lora:muscle_slider_v1:4> <lora:adam_TGIRL_e16_n32:.6>
+          negative = [input.negative]GS-DeFeminize-neg:1.3, smile, Unspeakable-Horrors-Composition-4v, low angle, BadDream UnrealisticDream JuggernautNegative-neg bad-hands-5, pants, two penises, cross eyed
+        Layered Paper
+          prompt = [input.description] as Layered paper, epic detail
+          negative = [input.negative]
+        Dax Jenkins
+          prompt = [input.description] on paper art print, in the style of gothcore, dark pink and light black, bryan hitch, portraiture with emotion, dynamic mark making, simplistic vector art, fluid ink washes on paper art print, in the style of gothcore, dark pink and light black, bryan hitch, portraiture with emotion, dynamic mark making, simplistic vector art, fluid ink washes
+          negative = [input.negative]
+        Fiber
+          prompt = [input.description] in black and white & in the style of ross tran, john chamberlain style, infinity nets, detailed hunting scenes, chaotic academia, konica auto s3, trompe-l'œil illusionistic detail
+          negative = [input.negative]
+        Metaphysical
+          prompt = [input.description] in metaphysical art style, reflection upon missed chances, a gateway to alternate realities, swirling in the sea of unseized opportunities
+          negative = [input.negative]
+        Futuristic Glam
+          prompt = [input.description] in the style of futuristic glam, fluid formation, hyper-realistic details, dark silver and light red, machine - like precision, curvilinear, bugcore
+          negative = [input.negative]
+        style of Coby Whitmore
+          prompt = [input.description] in the style of Coby Whitmore, Deliberate 2.0, Illustration, Painting, Cover Art, USA
+          negative = [input.negative]
+        Dynamic Pose (Evil)
+          prompt = [input.description] in  dynamic pose, low angle, exaggerated perspectives in the style of anton fadeev morbid, grim dark, dark, very detailed, rendered in octane, dense atmospheric, epic, dramatic, photorealistic, hyper ornate details, 4k, benedick bana, zhang jingna
+          negative = [input.negative]
+        Persephone In Space
+          prompt = [input.description], pixar disney animation, octane render sculpted, ethereal form a juxtaposition of delicate grace and captivating strength, luminescent presence that illuminates the void, celestial radiance, stardust and nebulae, flowing gown, fashioned from cosmic fabric, billows gracefully, resembling the swirling galaxies and constellations, It trails behind, leaving a mesmerizing trail of stardust, illustration, blender, 3d render
+          negative = [input.negative]
+        Diagrammatic drawing
+          prompt = diagrammatic drawing of [input.description]
+          negative = [input.negative]
+        Diagrammatic portrait
+          prompt = [input.description], diagrammatic portrait
+          negative = [input.negative]
+        Naked Male
+          prompt = [input.description], hyperrealistic naked male with hairy body, (((hairy chest))), hairy stomach, hairy arms, hairy legs, hairy pubes, penis: The penis is impressive, standing at a sizeable length of over 8 inches when fully erect and It has a girthy shaft that's well-defined and covered in thick veins giving it a rugged yet powerful appearance and The head is large and plump and is bearing a prominent ridge of sensitive tissue known as the corona and The foreskin is tight and pulled back which exposing the glans penis - the sensitive and bulbous tip that is highly sensitive to touch and stimulation and The color of the penis is a healthy skin tone indicating good blood flow and sexual arousal and The base of the shaft is adorned with a generous amount of pubic hair which adding to its masculine and rugged appeal and Overall this penis is a sight to behold - long and thick and primed for sexual dominance
+          negative = [input.negative]
+        Gay Facial (NSFW)
+          prompt = [input.description],man, extreme close up on face, (lots of thick stringy white ((cum on face))), eyes {closed^3.0|squinting}
+          negative = [input.negative], clitoris, women, female, pussy, vagina, girl, woman, feminine, boobs, breasts, small penis, deformed penises, double penises on one man, no penis, half penis, clit, transgender, cartoon, drawing, 2d, 3d render, airbrushed, anime, illustration, drawing,  unrealistic skin
+        HyperCum
+          prompt = [input.description], gay, men (bukkake, cumshot, cum on face, cum on chest, cum on body, cum on clothing, dripping cum, covered in cum)
+          negative = [input.negative], clitoris, women, female, pussy, vagina, girl, woman, feminine, boobs, breasts, small penis, deformed penises, double penises on one man, no penis, half penis, clit, transgender, cartoon, drawing, 2d, 3d render, airbrushed, anime, illustration, drawing,  unrealistic skin
+        Homoerotic (NSFW)
+          prompt = [input.description], homoerotic, naked men, detailed penis, uncut penis, circumsized penis, hairy pubes, erect dick, photoreal, handsome, hyper-realistic, detailed hairy testicles,
+          negative = [input.negative], clitoris, women, female, pussy, vagina, girl, woman, feminine, boobs, breasts, small penis, deformed penises, double penises on one man, no adidas, clit, transgender, cartoon, drawing, 2d, 3d render, airbrushed, anime, illustration, drawing,  unrealistic skin
+        Homoerotic realism (NSFW)
+          prompt = [input.description], hyperrealistic men with detailed penises, shallow focus, shiny, glossy, reflective, 8k uhd, soft lighting, high quality, film grain, Fujifilm XT3
+          negative = [input.negative], cartoon, drawing, 2d, 3d render, airbrushed, anime, illustration, drawing,  unrealistic skin, vagina, female, clitoris, deformed penis, small penis, double penis, transgender
+        Evil
+          prompt = [input.description], room and atmosphere feel: evil, dark, hyperrealistic, unsettling, eerie, glowing, demonic, dark reds
+          negative = [input.negative], cartoon, drawing, 2d, 3d render, airbrushed, anime, illustration, drawing,  unrealistic skin, vagina, female, clitoris, deformed penis, small penis, double penis, transgender
+        Style of Neal Adams
+          prompt = [input.description] in the style of Neal Adams, Deliberate 2.0, Illustration Comic, DC Comics, Marvel, Cover Art USA
+          negative = [input.negative]
+        flat design poster
+          prompt = [input.description] as a  flat design poster, bright colors
+          negative = [input.negative]
+        Vaporwave neon
+          prompt = [input.description] as Vaporwave style image, neon futuristic city, purple, dark blue, bright green, neon
+          negative = [input.negative]
+        Impressionism
+          prompt = [input.description] in the impressionism style
+          negative = [input.negative]
+        Naked Male Tank Top
+          prompt = [input.description] highres, score_9, score_8_up, realistic, highly detailed, realistic eyes, intricate details, detailed background. photo of a handsome Irish man, 35 yo, beard, skinny, hairy chest, wearing a thin white tank top, , no pants, (((flaccid penis))), thick red pubic hair, soft penis, limp penis, testicles, loose testicles, sitting on bed by the window, cowboy shot, medium shot, detailed face, detailed eyes, depth of field, dynamic poses, dynamic angle. indoors, bedroom, sunrays
+          negative = [input.negative] ogo, watermark, pants, shorts, bara, hyper muscle, child, vagina, girly, girl, woman, feminine, ((((erection, erect penis, hard penis)))), defined abs
+        Atompunk
+          prompt = [input.description]: atompunk style
+          negative = [input.negative]
+        Nude Male
+          prompt = [input.description] A naked male, full body shot, penis, visible penis, natural light, private plane, dynamic pose, people around. Think about how relocating the furniture to resolve placement issues and how relocating the human body to avoid placement issues with furniture around. Proportions and size and distances between all elements are harmonious
+          negative = [input.negative] Asian, manga, CGI, 3D, muscular, damaged face, ugly eyes, tall person:, broken limbs, unrealistic, female vulva, deformities
+        Gothic
+          prompt = [input.description] as Gothic art, detailed, dark, hyperrealistic
+          negative = [input.negative]
+        style of AFREMOV LEONID
+          prompt = [input.description] in the style of AFREMOV LEONID, Deliberate 2.0, Painting Belarus
+          negative = [input.negative]
+        Ancient Roman
+          prompt = [input.description], ancient roman men with hairy chests, rugged, sexy ancient roman soldier attire, masculine, loin cloths, togas, revealing, gladiator
+          negative = [input.negative], cartoon, drawing, 2d, 3d render, airbrushed, anime, illustration, drawing,  unrealistic skin
+        Prison Cellmate Seduction (NSFW)
+          prompt = [input.description](masterpiece), 2 prison trash men, rugged, hairy chests, tattoos, shirtless, prison orange boxers, shared bunk bed, whispers, sexual tension, realistic
+          negative = [input.negative]
+        Military Barracks Night (NSFW)
+          prompt = [input.description] 2 military men, rugged, camo, unbuttoned shirt, hairy chest, sunglasses, photo real, detailed penis
+          negative = [input.negative]
+        Roman Bath Encounter
+          prompt = [input.description], 2 ancient roman men, hairy chests, rugged, hairy legs, togas off, marble bathhouse, misty air, intimate conversation, historical realism
+          negative = [input.negative]
+        In the style of ALBUQUERQUE RAFAEL
+          prompt = [input.description] In the style of ALBUQUERQUE RAFAEL, DreamShaper 3.2, Comic, DC Comics, Brazil
+          negative = [input.negative]
+        style of Henry Asencio
+          prompt = [input.description] in the style of Henry Asencio, DreamShaper 3.2, Painting, Oil, USA
+          negative = [input.negative]
+        style of Yanjun Cheng
+          prompt = [input.description] in the style of Yanjun Cheng, iridescent, Deliberate 2.0, Illustration, Portrait
+          negative = [input.negative]
+        Dadbod running (NSFW)
+          prompt = [input.description] middle-aged, 45yo, muscular, handsome, rounded belly, (((dad bod, rounded belly))), (((pubic hair, pubes, hairy))), ((naked, circumcised large flaccid penis)), ((((large testicles)))), wearing running shoes, socks, baseball cap, sweaty skin, extremely realistic, full-body pose, full body view, outside, public park, paved path, sunlight, dynamic angle, (jogging, running)
+          negative = [input.negative] safe_neg, BadDream, UnrealisticDream, EpicMix-AntiLady, ((inverted nipples)), visible abs
+        Men
+          prompt = [input.description] man, handsome, (((hairy body))), (((pubic hair, pubes, hairy))), ((naked, circumcised detailed penis)), ((((testicles)))), extremely realistic, full-body pose, extremely detailed penis and testicles, full body view,  dynamic angle,
+          negative = [input.negative] safe_neg, BadDream, UnrealisticDream, EpicMix-AntiLady, ((inverted nipples)), ((deformed penis)), ((vagina)), ((clitoris)), ((female))
+        style of Bob Mizer
+          prompt = [input.description] in the style of Bob Mizer, Deliberate 2.0, Photography, Movie Director, Portrait, Pin-Ups
+          negative = [input.negative]
+        90s Comic
+          prompt = [input.description], 90s comic book artwork, colored comic book panel, classic 90s style, masterpiece
+          negative = [input.negative], bad photo, greyscale, blurry, bad 3D render, crappy 3D art, barcode, logo, bad photo
+          meta:tags = [({vintage:80, comic:80})]
+        Wizard fantasy
+          prompt = [input.description], fantasy art style, mystical land of perpetual storms, inhabited by wizards cloaked in electric blue energy, casting spells that shatter reality into shimmering fragments
+          negative = [input.negative], bad photo, greyscale, blurry, bad 3D render, crappy 3D art, barcode, logo, bad photo
+        DC Comic Style
+          prompt = [input.description] in DC Comic book style, multi-panel comic book page, detailed, extreme, colorful
+          negative = [input.negative]
+        Britney Spears Style
+          prompt = [input.description] of britney spears, britney spears, superstar britney spears, extremely detailed facial features of britney spears, hyper-realistic britney spears, extremely accurate britney spears, britney spears beautiful, very detailed britney spears face (brown eyes, pursed lips), perfect structure of britney spears face, britney spears facial expressions, britney spears detailed eyes, britney spears detailed lips and nose, Britney Spears-style (album cover art, music videos), britney spears outfits, britney spears blackout, britney spears blonde hair, britney spears black hair, britney spears glory, britney spears vma, britney spears slave 4 u, britney spears toxic, britney spears oops!..I did it again, britney spears stronger, britney spears my prerogative, britney spears circus, britney spears gimme more, britney spears piece of me
+          negative = [input.negative] nsfw, deformed, fake britney look-a-like, cartoon, drawing, 2d, 3d render, airbrushed, anime, illustration, drawing,  unrealistic skin
+        Isometric illustration
+          prompt = isometric illustration of [input.description]
+          negative = [input.negative]
+        Hairy men
+          prompt = [input.description], hairy men, hairy chest, hairy body, photo, no shirt, shirtless, dad, hairy pubes, photorealistic, hyperrealistic, thin shorts or underwear or jockstrap or jeans or gym shorts or a towel, long socks, boots or no shoes or skater shoes or addidas, leather or no leather, harness
+          negative = [input.negative], women, poor quality, deformed, clitoris, cartoon, drawing, 2d, 3d render, airbrushed, anime, illustration, drawing,  unrealistic skin
+        Dark fantasy
+          prompt = [input.description], dark fantasy
+          negative = [input.negative]
+        Futuristic
+          prompt = [input.description], futuristic, modern style, high quality
+          negative = [input.negative]
+        Paper cut craft
+          prompt = [input.description] as paper cut craft
+          negative = [input.negative]
+        Paper quilling
+          prompt = [input.description] as paper quilling
+          negative = [input.negative]
+        meta:import
+          from = {import:t2i-styles} // <-- imports a bunch of 'default' styles (you can delete this, or put it at the end, below 'No style' if you want)
+        MTG Card
+          prompt = [input.description] as a magic the gathering card
+          negative = [input.negative], low-quality, deformed, blurry, bad art
+        Vintage Halloween
+          prompt = [input.description], in the style of a 1930s vintage halloween greeting card, slightly faded colors, paper texture, art by Jack-o'-Lantern, spooky but whimsical, black cats, witches, ghosts
+          negative = [input.negative], photograph, realistic, 3d render, modern
+        Gothic Horror Film
+          prompt = cinematic film still of [input.description], in the style of a classic gothic horror film, high contrast black and white, dramatic shadows, film grain, expressionist, moody, atmospheric
+          negative = [input.negative], color, painting, drawing, cartoon
+        Spooky Decorative Lighting
+          prompt = [input.description], glowing decorative halloween lights, spooky string lights in the shape of ghosts and pumpkins, volumetric light, dark background, photorealistic, bokeh
+          negative = [input.negative], drawing, 2d, illustration
+        None
+          prompt = [input.description]
+          negative = [input.negative]
+          meta:position = 5
+        Emptiness
+          prompt = [input.description] in the style of marko manev, richard billingham, ethereal portraiture, tonalist color scheme, james paick, pensive stillness, dark aquamarine and red
+          negative = [input.negative]
+        Greek God
+          prompt = [input.description], The primordial darkness embodying a greek god, wearing ancient greek clothing, galaxy with solar system as background, cinematic, soft studio lighting, backlighting, dark background
+          negative = [input.negative]
+        Nazgul over sleeping town
+          prompt = [input.description], Nazgul over sleeping town
+          negative = [input.negative]
+        Neon Hair
+          prompt = [input.description], neon hair
+          negative = [input.negative], cartoon, drawing, 2d, 3d render, airbrushed, anime, illustration, drawing,  unrealistic skin
+        Neon Noir
+          prompt = [input.description], neon noir style, moody lighting, rainy streets, glowing signs, cyberpunk atmosphere, dark blues, purples, and vibrant neons
+          negative = [input.negative], cartoon, drawing, 2d, 3d render, anime, illustration, bright sunlight, cheerful, overly colorful
+        Haunted House Atmosphere
+          prompt = [input.description], haunted house atmosphere, eerie glow, shadows, moonlight through windows, mist, decaying grandeur, sepia tones with hints of dark red and green
+          negative = [input.negative], bright, cheerful, modern, clean, cartoon, anime, vibrant colors
+        Dreamy Pastel
+          prompt = [input.description], dreamy pastel colors, soft focus, ethereal lighting, whimsical, gentle gradients, light pinks, blues, yellows, and purples
+          negative = [input.negative], dark, harsh, realistic, sharp, cartoon, anime, strong shadows
+        Gothic Cathedral Stained Glass
+          prompt = [input.description], gothic cathedral stained glass effect, intricate patterns, jewel tones, light filtering through colored glass, dramatic shadows
+          negative = [input.negative], cartoon, drawing, 2d, 3d render, anime, illustration, blurry, low detail, modern art
+        Cinematic Lighting
+          prompt = [input.description], cinematic lighting, dramatic shadows, volumetric light, professional photography, film grain, deep rich colors, golden hour, blue hour
+          negative = [input.negative], flat lighting, cartoon, drawing, 2d, 3d render, anime, illustration, blurry, low quality
+        Spooky Silhouettes
+          prompt = [input.description], spooky silhouettes against a dramatic sky, atmospheric perspective, limited color palette, high contrast, eerie
+          negative = [input.negative], detailed faces, bright, cheerful, cartoon, anime, clear features
+        Vibrant Halloween Night
+          prompt = [input.description], vibrant Halloween night, glowing pumpkins, festive lights, deep oranges, purples, and greens, playful spooky elements, misty
+          negative = [input.negative], scary, gory, black and white, cartoon, anime, bright daylight
+        Dark Academia Aesthetic
+          prompt = [input.description], dark academia aesthetic, dim lighting, old books, antique furniture, muted tones, sepia, deep greens, burgundies, and browns
+          negative = [input.negative], bright, modern, colorful, cartoon, anime, futuristic
+        Mystical Forest Glow
+          prompt = [input.description], mystical forest glow, bioluminescent plants, glowing moss, enchanting, magical lighting, deep blues, purples, and soft greens
+          negative = [input.negative], urban, modern, harsh light, cartoon, anime, realistic
+        Action Fire Gladiator
+          prompt = [input.description], action scene, in the style of Frank Frazetta's paintings, with a fierce muscular hero battling a horde of monsters and demons, wielding a glowing sword and a fiery aura
+          negative = [input.negative]
+        Mike Mignla Comic
+          prompt = [input.description] in the style of Mike Mignola, comic style
+          negative = [input.negative]
+        Retrowave portrait
+          prompt = retrowave portrait of [input.description]
+          negative = [input.negative]
+        NSFW - Hyperrealistic Men
+          prompt = [input.description], highly realistic, realistic portrait, (nsfw), anatomically correct, detailed penis, realistic photograph, real colors, award winning photo, detailed face, realistic eyes, beautiful, sharp focus, high resolution, volumetric lighting, incredibly detailed, masterpiece, breathtaking, exquisite, great attention to skin and eyes, penis, detailed penis, detailed testicles, hairy testicles, hairy body
+          negative = [input.negative], unrealistic, animated, 3d, sketches, (text), low-quality, deformed, extra limbs, blurry, bad art, (logo), watermark, blurred, cut off, extra fingers, bad quality, distortion of proportions, deformed fingers, elongated body, cropped image, deformed hands, deformed legs, deformed face, twisted fingers, double image, detailed neck, extra limb, plastic, disfigured, mutation, sloppy, ugly, pixelated, bad hands, aliasing, overexposed, oversaturated, burnt image, fuzzy, poor quality, deformed arms
+        Star Wars Character
+          prompt = [input.description], (((one character:1.5))),(Star Wars Art Style:1.3), (Animated Star Wars Art style:1.3), (Star Wars Anime Art style:1.3), (Anime Art style:1.3), (bright color grading:1.2), (vibrant color grading:1.2), (light leaks), (lens flare)
+          negative = [input.negative], (((two or more characters:1.5))), (floating lightsabers:1.3), (unaccompanied lightsabers:1.3), low-quality, deformed, blurry, bad art
+        Realistic images
+          prompt = [input.description], high quality image, 4k, 8k, HD, UHD, Sharp Focus, In Frame
+          negative = [input.negative], low quality, deformed, blurry, bad art, drawing, painting, horrible resolutions, low DPI, low PPI, blurry, glitch, error
+        Realistic humans
+          prompt = [input.description], high quality image, 4k, 8k, HD, UHD
+          negative = [input.negative], low quality, deformed, blurry, bad art, drawing, painting, incorrect anatomy, ugliness, ugly, horrible resolutions, low DPI, low PPI, bad character positioning, absurd anatomy, tiling, pixelization, low pixel count, blurry, low-res face, low poly, Poorly Drawn Characters, Badly Drawn Eyes, Badly Drawn Mouth, Badly Drawn Ears, Badly Drawn Nose, Badly Drawn Hands, Badly Drawn Feet, Badly Drawn Legs, Badly Drawn Hair, Badly Drawn Clothing, bad anatomy, (ugly), missing arms, bad proportions, tiling, missing legs, blurry, (poorly drawn feet), morbid, cloned face, ((extra limbs)), (mutated hands), cropped, (disfigured), mutation, deformed, (mutilated), dehydrated, body out of frame, out of frame, (disfigured), ((bad anatomy)), (poorly drawn face), duplicate, cut off, (poorly drawn hands), error, low contrast, signature, (extra arms), underexposed, text, (extra fingers), overexposed, (too many fingers), (extra legs), bad art, ugly, (extra limbs), beginner, username, (fused fingers), amateur, watermark, (distorted face), worst quality, jpeg artifacts, low quality, (malformed limbs), long neck, low-res, (poorly Rendered face), low resolution, low saturation, (bad composition), Images cut out at the top, left, right, bottom, (deformed body features), (poorly rendered hands)
+        Cyberpunk Cityscape
+          prompt = [input.description], cyberpunk cityscape, neon-drenched streets, towering skyscrapers, flying vehicles, holographic advertisements, cinematic lighting, highly detailed, Blade Runner aesthetic
+          negative = [input.negative], nature, rural, fantasy, medieval, bright daylight, utopian
+        Art Nouveau
+          prompt = [input.de
