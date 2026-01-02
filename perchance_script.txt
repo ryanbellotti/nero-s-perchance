@@ -1,0 +1,704 @@
+generateHTML = {import:t2i-framework-plugin-v2}
+commentsPlugin = {import:comments-plugin}
+
+// FIX: Empty list to prevent comment plugin errors
+bannedUsersList
+
+// Common NSFW negative prompts
+commonNsfwNegative = female, cartoon, 3d, unrealistic, deformed, blurry, child, text, watermark, bad anatomy, clitoris, pussy, vagina, girl, woman, feminine, boobs, breasts
+
+// Random prompt parts (for future use)
+randomSubject = a rugged hairy bear, a slender young twink, two muscular jocks, a handsome construction worker, an older leather daddy, two handsome sailors, a rugged cowboy
+randomAction = options after a long day, posing confidently in front of a mirror, sharing an intimate moment, working up a sweat, exploring a hidden place
+randomSetting = in a rustic cabin bedroom, at a sun-drenched beach, in a gritty locker room, in a high-tech neon-lit apartment, in the hayloft of a barn, on the deck of a ship
+randomDescription = [randomSubject] [randomAction] [randomSetting]
+
+$meta
+  title = Nero's AI Image Generator
+  description = 18+ ONLY! Uncensored AI. Generate high-quality naked men and explicit art instantly. Free, unlimited, no login, no watermarks, no censorship.
+
+settings
+  pageTitle = "NERO'S IMAGE GENERATOR" <br><font size=1>(18+ Only - Explicit content allowed)</font>
+  introMessage = <b>New:</b> Upload a photo to lock the exact face onto any style! • Set inputs and click generate.<br><br><a href="https://discord.com/invite/dQykEP4R">Join our Discord</a>
+  numImages = [Number(input.numImages) || 6]
+  socialFeatures = enabled
+
+imageOptions
+  saveTitle = [input.artStyle?.getName() || "Custom"] - [input.description || "Image"]
+  resolution = [input.shape]
+
+  // MAIN PROMPT LOGIC WITH FACE LOCK
+  prompt = {
+    let base = input.artStyle?.prompt || input.description || ""
+
+    // Inject face lock if user uploaded a photo
+    if (input.uploadedPhoto) {
+      let strength = input.faceStrength || 0.9
+      let method = input.faceControl || "auto"
+      let facePart = `((exact face from uploaded photo, ${method}, highly detailed facial features, perfect likeness: ${strength}))`
+      base = `${facePart}, ${base}`
+    }
+
+    // Append style-specific modifiers if they exist
+    if (input.artStyle?.modifiers) {
+      base = `${base}, ${input.artStyle.modifiers}`
+    }
+
+    return base
+  }
+
+  negativePrompt = [input.artStyle?.negative || input.negative || ""]
+
+userInputs
+
+  uploadedPhoto
+    label = Upload Reference Face (optional)
+    type = imageUpload
+    tip = Upload a clear front-facing photo → the AI will use this exact face in all generations
+    width = 100%
+    takesUpFullRow = true
+    maxFileSizeMB = 10
+    acceptedFileTypes = image/jpeg, image/png, image/webp
+
+  faceStrength
+    label = Face Lock Strength
+    type = slider
+    min = 0
+    max = 1.5
+    step = 0.05
+    default = 0.9
+    tip = Higher = closer to the uploaded face (0 = ignore upload)
+    visible() => input.uploadedPhoto != null
+
+  faceControl
+    label = Face Control Method
+    type = select
+    default = auto
+    options
+      auto = Auto (recommended)
+      faceid = FaceID (most accurate)
+      faceid-plus = FaceID+ (strongest)
+      instantid = InstantID (fast + great style transfer)
+      photomaker = PhotoMaker (best photoreal)
+      ip-adapter-face = IP-Adapter Face (classic)
+    visible() => input.uploadedPhoto != null && input.faceStrength > 0.3
+
+  description
+    label = Description / Prompt
+    tip = [t2i.defaultText.promptTip]
+    type = paragraph
+    width = min(750px, 100%)
+    takesUpFullRow = true
+    modifiers = [input.artStyle?.modifiers || null]
+    modifierUpdates = event:description.input, event:artStyle.change
+    enterKeyTriggersGeneration = true
+    examples = [input.artStyle?.randomPrompt || randomDescription.selectOne]
+    random = [input.artStyle?.randomPrompt || randomDescription.selectOne]
+
+  negative
+    label = Negative Prompt <i><font size=1>(optional)</font></i>
+    tip = [t2i.defaultText.negativePromptTip]
+    type = text
+    examples = blurry, deformed, ugly, extra limbs, child, female
+
+  artStyle
+    label = Art Style
+    type = select
+    remember = true
+    options
+      // --- SFW STYLES ---
+      Bauhausauhaus
+        prompt = [input.description], Bauhaus
+        negative = [input.negative]
+      infographic drawing
+        prompt = infographic about: [input.description]
+        negative = [input.negative]
+      Captivating Portrait
+        prompt = Captivating portrait of [input.description], Captivating photography, immortalized by the powerful lens of the Nikon Z9 camera, reveals exceptional clarity and stunning realism, showcasing every detail, The photo offers a view from below, presenting the silhouette of the protagonist, The protagonist's face is captured with incredible precision, detailing unique features
+        negative = [input.negative], cartoon, drawing, 2d, 3d render, airbrushed, anime, illustration, drawing, unrealistic skin
+      Blacklight
+        prompt = [input.description], Blacklight
+        negative = [input.negative]
+      Layered Paper
+        prompt = [input.description] as Layered paper, epic detail
+        negative = [input.negative]
+      Dax Jenkins
+        prompt = [input.description] on paper art print, in the style of gothcore, dark pink and light black, bryan hitch, portraiture with emotion, dynamic mark making, simplistic vector art, fluid ink washes on paper art print, in the style of gothcore, dark pink and light black, bryan hitch, portraiture with emotion, dynamic mark making, simplistic vector art, fluid ink washes
+        negative = [input.negative]
+      Fiber
+        prompt = [input.description] in black and white & in the style of ross tran, john chamberlain style, infinity nets, detailed hunting scenes, chaotic academia, konica auto s3, trompe-l'œil illusionistic detail
+        negative = [input.negative]
+      Metaphysical
+        prompt = [input.description] in metaphysical art style, reflection upon missed chances, a gateway to alternate realities, swirling in the sea of unseized opportunities
+        negative = [input.negative]
+      Futuristic Glam
+        prompt = [input.description] in the style of futuristic glam, fluid formation, hyper-realistic details, dark silver and light red, machine - like precision, curvilinear, bugcore
+        negative = [input.negative]
+      style of Coby Whitmore
+        prompt = [input.description] in the style of Coby Whitmore, Deliberate 2.0, Illustration, Painting, Cover Art, USA
+        negative = [input.negative]
+      Dynamic Pose (Evil)
+        prompt = [input.description] in dynamic pose, low angle, exaggerated perspectives in the style of anton fadeev morbid, grim dark, dark, very detailed, rendered in octane, dense atmospheric, epic, dramatic, photorealistic, hyper ornate details, 4k, benedick bana, zhang jingna
+        negative = [input.negative]
+      Persephone In Space
+        prompt = [input.description], pixar disney animation, octane render sculpted, ethereal form a juxtaposition of delicate grace and captivating strength, luminescent presence that illuminates the void, celestial radiance, stardust and nebulae, flowing gown, fashioned from cosmic fabric, billows gracefully, resembling the swirling galaxies and constellations, It trails behind, leaving a mesmerizing trail of stardust, illustration, blender, 3d render
+        negative = [input.negative]
+      Diagrammatic drawing
+        prompt = diagrammatic drawing of [input.description]
+        negative = [input.negative]
+      Diagrammatic portrait
+        prompt = [input.description], diagrammatic portrait
+        negative = [input.negative]
+      Evil
+        prompt = [input.description], room and atmosphere feel: evil, dark, hyperrealistic, unsettling, eerie, glowing, demonic, dark reds
+        negative = [input.negative], [commonNsfwNegative]
+      Style of Neal Adams
+        prompt = [input.description] in the style of Neal Adams, Deliberate 2.0, Illustration Comic, DC Comics, Marvel, Cover Art USA
+        negative = [input.negative]
+      flat design poster
+        prompt = [input.description] as a flat design poster, bright colors
+        negative = [input.negative]
+      Vaporwave neon
+        prompt = [input.description] as Vaporwave style image, neon futuristic city, purple, dark blue, bright green, neon
+        negative = [input.negative]
+      Impressionism
+        prompt = [input.description] in the impressionism style
+        negative = [input.negative]
+      Atompunk
+        prompt = [input.description]: atompunk style
+        negative = [input.negative]
+      Gothic
+        prompt = [input.description] as Gothic art, detailed, dark, hyperrealistic
+        negative = [input.negative]
+      style of AFREMOV LEONID
+        prompt = [input.description] in the style of AFREMOV LEONID, Deliberate 2.0, Painting Belarus
+        negative = [input.negative]
+      In the style of ALBUQUERQUE RAFAEL
+        prompt = [input.description] In the style of ALBUQUERQUE RAFAEL, DreamShaper 3.2, Comic, DC Comics, Brazil
+        negative = [input.negative]
+      style of Henry Asencio
+        prompt = [input.description] in the style of Henry Asencio, DreamShaper 3.2, Painting, Oil, USA
+        negative = [input.negative]
+      style of Yanjun Cheng
+        prompt = [input.description] in the style of Yanjun Cheng, iridescent, Deliberate 2.0, Illustration, Portrait
+        negative = [input.negative]
+      style of Bob Mizer
+        prompt = [input.description] in the style of Bob Mizer, Deliberate 2.0, Photography, Movie Director, Portrait, Pin-Ups
+        negative = [input.negative]
+      90s Comic
+        prompt = [input.description], 90s comic book artwork, colored comic book panel, classic 90s style, masterpiece
+        negative = [input.negative], bad photo, gruploadedPhotory, bad 3D render, crappy 3D art, barcode, logo, bad photo
+      Wizard fantasy
+        prompt = [input.description], fantasy art style, mystical land of perpetual storms, inhabited by wizards cloaked in electric blue energy, casting spells that shatter reality into shimmering fragments
+        negative = [input.negative], bad photo, greyscale, blurry, bad 3D render, crappy 3D art, barcode, logo, bad photo
+      DC Comic Style
+        prompt = [input.description] in DC Comic book style, multi-panel comic book page, detailed, extreme, colorful
+        negative = [input.negative]
+      Britney Spears Style
+        prompt = [input.description] of britney spears, britney spears, superstar britney spears, extremely detailed facial features of britney spears, hyper-realistic britney spears, extremely accurate britney spears, britney spears beautiful, very detailed britney spears face (brown eyes, pursed lips), perfect structure of britney spears face, britney spears facial expressions, britney spears detailed eyes, britney spears detailed lips and nose, Britney Spears-style (album cover art, music videos), britney spears outfits, britney spears blackout, britney spears blonde hair, britney spears black hair, britney spears glory, britney spears vma, britney spears slave 4 u, britney spears toxic, britney spears oops!..I did it again, britney spears stronger, britney spears my prerogative, britney spears circus, britney spears gimme more, britney spears piece of me
+        negative = [input.negative] nsfw, deformed, fake britney look-a-like, cartoon, drawing, 2d, 3d render, airbrushed, anime, illustration, drawing, unrealistic skin
+      Isometric illustration
+        prompt = isometric illustration of [input.description]
+        negative = [input.negative]
+      Dark fantasy
+        prompt = [input.description], dark fantasy
+        negative = [input.negative]
+      Futuristic
+        prompt = [input.description], futuristic, modern style, high quality
+        negative = [input.negative]
+      Paper cut craft
+        prompt = [input.description] as paper cut craft
+        negative = [input.negative]
+      Paper quilling
+        prompt = [input.description] as paper quilling
+        negative = [input.negative]
+      MTG Card
+        prompt = [input.description] as a magic the gathering card
+        negative = [input.negative], low-quality, deformed, blurry, bad art
+      None
+        prompt = [input.description]
+        negative = [input.negative]
+        meta:position = 5
+      Emptiness
+        prompt = [input.description] in the style of marko manev, richard billingham, ethereal portraiture, tonalist color scheme, james paick, pensive stillness, dark aquamarine and red
+        negative = [input.negative]
+      Greek God
+        prompt = [input.description], The primordial darkness embodying a greek god, wearing ancient greek clothing, galaxy with solar system as background, cinematic, soft studio lighting, backlighting, dark background
+        negative = [input.negative]
+      Nazgul over sleeping town
+        prompt = [input.description], Nazgul over sleeping town
+        negative = [input.negative]
+      Neon Hair
+        prompt = [input.description], neon hair
+        negative = [input.negative], cartoon, drawing, 2d, 3d render, airbrushed, anime, illustration, drawing, unrealistic skin
+      Action Fire Gladiator
+        prompt = [input.description], action scene, in the style of Frank Frazetta's paintings, with a fierce muscular hero battling a horde of monsters and demons, wielding a glowing sword and a fiery aura
+        negative = [input.negative]
+      Mike Mignla Comic
+        prompt = [input.description] in the style of Mike Mignola, comic style
+        negative = [input.negative]
+      Retrowave portrait
+        prompt = retrowave portrait of [input.description]
+        negative = [input.negative]
+      Star Wars Character
+        prompt = [input.description], (((one character:1.5))),(Star Wars Art Style:1.3), (Animated Star Wars Art style:1.3), (Star Wars Anime Art style:1.3), (Anime Art style:1.3), (bright color grading:1.2), (vibrant color grading:1.2), (light leaks), (lens flare)
+        negative = [input.negative], (((two or more characters:1.5))), (floating lightsabers:1.3), (unaccompanied lightsabers:1.3), low-quality, deformed, blurry, bad art
+      Realistic images
+        prompt = [input.description], high quality image, 4k, 8k, HD, UHD, Sharp Focus, In Frame
+        negative = [input.negative], low quality, deformed, blurry, bad art, drawing, painting, horrible resolutions, low DPI, low PPI, blurry, glitch, error
+      Realistic humans
+        prompt = [input.description], high quality image, 4k, 8k, HD, UHD
+        negative = [input.negative], low quality, deformed, blurry, bad art, drawing, painting, incorrect anatomy, ugliness, ugly, horrible resolutions, low DPI, low PPI, bad character positioning, absurd anatomy, tiling, pixelization, low pixel count, blurry, low-res face, low poly, Poorly Drawn Characters, Badly Drawn Eyes, Badly Drawn Mouth, Badly Drawn Ears, Badly Drawn Nose, Badly Drawn Hands, Badly Drawn Feet, Badly Drawn Legs, Badly Drawn Hair, Badly Drawn Clothing, bad anatomy, (ugly), missing arms, bad proportions, tiling, missing legs, blurry, (poorly drawn feet), morbid, cloned face, ((extra limbs)), (mutated hands), cropped, (disfigured), mutation, deformed, (mutilated), dehydrated, body out of frame, out of frame, (disfigured), ((bad anatomy)), (poorly drawn face), duplicate, cut off, (poorly drawn hands), error, low contrast, signature, (extra arms), underexposed, text, (extra fingers), overexposed, (too many fingers), (extra legs), bad art, ugly, (extra limbs), beginner, username, (fused fingers), amateur, watermark, (distorted face), worst quality, jpeg artifacts, low quality, (malformed limbs), long neck, low-res, (poorly Rendered face), low resolution, low saturation, (bad composition), Images cut out at the top, left, right, bottom, (deformed body features), (poorly rendered hands)
+      Cyberpunk Cityscape
+        prompt = [input.description], cyberpunk cityscape, neon-drenched streets, towering skyscrapers, flying vehicles, holographic advertisements, cinematic lighting, highly detailed, Blade Runner aesthetic
+        negative = [input.negative], nature, rural, fantasy, medieval, bright daylight, utopian
+      Art Nouveau
+        prompt = [input.description], in the style of Art Nouveau, elegant curved lines, intricate floral patterns, decorative, ornamental, Alphonse Mucha inspired
+        negative = [input.negative], geometric, minimalist, simple, harsh lines, brutalist
+      Steampunk
+        prompt = [input.description] in a steampunk style, intricate gears and cogs, steam-powered machinery, Victorian-era fashion, brass and copper details, retrofuturistic
+        negative = [input.negative], modern, futuristic, minimalist, sleek, plastic
+      Pop Art
+        prompt = [input.description] in a Pop Art style, bold colors, Ben-Day dots, comic book aesthetic, mass culture imagery, Andy Warhol inspired
+        negative = [input.negative], realistic, subtle colors, traditional painting, fine art
+      Surrealism
+        prompt = [input.description] in a surrealist style, dreamlike, bizarre, unexpected juxtapositions, illogical scenes, Salvador Dalí inspired
+        negative = [input.negative], realistic, logical, mundane, ordinary, straightforward
+      Abstract Expressionism
+        prompt = [input.description] in the style of abstract expressionism, non-representational, gestural brush-strokes, spontaneous, emotional, Jackson Pollock inspired
+        negative = [input.negative], realistic, figurative, detailed, precise, calm
+      Minimalism
+        prompt = [input.description] in a minimalist style, clean lines, simple shapes, limited color palette, uncluttered, focused on essential elements
+        negative = [input.negative], ornate, complex, detailed, cluttered, colorful
+      Street Art/Graffiti
+        prompt = [input.description] as street art, spray paint, stencil work, bold lettering, vibrant, urban environment, Banksy inspired
+        negative = [input.negative], traditional art, fine art, clean, polished, indoor setting
+      Fantasy Map
+        prompt = [input.description] as a fantasy map, aged parchment, calligraphy, compass rose, sea monsters, mountains and forests, cartography, Tolkien-esque
+        negative = [input.negative], modern map, satellite image, realistic, simple, unadorned
+      Watercolor Painting
+        prompt = [input.description] as a watercolor painting, soft washes of color, delicate, translucent, flowing, impressionistic
+        negative = [input.negative], oil painting, acrylic, sharp lines, opaque, bold
+      Pixel Art
+        prompt = [input.description] as pixel art, 8-bit or 16-bit style, retro video game aesthetic, blocky, limited color palette
+        negative = [input.negative], high resolution, realistic, smooth, detailed, modern graphics
+      Claymation
+        prompt = [input.description] in a claymation style, stop-motion animation, plasticine figures, textured, whimsical, Aardman Animations inspired
+        negative = [input.negative], 2D animation, CGI, realistic, smooth, polished
+      Synthwave
+        prompt = [input.description] in a synthwave style, 1980s retrofuturism, neon grid lines, sunset, palm trees, chrome, vibrant pinks and blues
+        negative = [input.negative], realistic, modern, natural, muted colors, historical
+      Dieselpunk
+        prompt = [input.description] in a dieselpunk style, 1930s-1940s aesthetic, art deco, industrial, gritty, noir, military technology
+        negative = [input.negative], futuristic, sleek, clean, bright, natural
+      Solarpunk
+        prompt = [input.description] in a solarpunk style, futuristic, sustainable, eco-friendly, harmony between nature and technology, bright, optimistic, art nouveau influences
+        negative = [input.negative], dystopian, polluted, industrial, dark, gritty
+      Anatomical Drawing
+        prompt = [input.description] as an anatomical drawing, detailed study of form and structure, scientific illustration, cross-section, labeled parts, vintage textbook style
+        negative = [input.negative], color, bright, cheerful, flat lighting, simple
+      Psychedelic Art
+        prompt = [input.description] in a psychedelic style, vibrant colors, swirling patterns, kaleidoscopic, trippy, surreal, 1960s counterculture inspired
+        negative = [input.negative], realistic, monochrome, simple, minimalist, orderly
+      Glitch Art
+        prompt = [input.description] as glitch art, digital errors, pixel sorting, databending, distorted, corrupted image, abstract, vibrant
+        negative = [input.negative], clean, perfect, realistic, traditional, analog
+      Double Exposure
+        prompt = [input.description] as a double exposure, two images superimposed, creative blend, artistic, silhouette combined with a landscape or texture
+        negative = [input.negative], single image, clear, straightforward, realistic, unedited
+
+      // --- HALLOWEEN & SPOOKY STYLES ---
+      Vintage Halloween
+        prompt = [input.description], in the style of a 1930s vintage halloween greeting card, slightly faded colors, paper texture, art by Jack-o'-Lantern, spooky but whimsical, black cats, witches, ghosts
+        negative = [input.negative], photograph, realistic, 3d render, modern
+      Gothic Horror Film
+        prompt = cinematic film still of [input.description], in the style of a classic gothic horror film, high contrast black and white, dramatic shadows, film grain, expressionist, moody, atmospheric
+        negative = [input.negative], color, painting, drawing, cartoon
+      Spooky Decorative Lighting
+        prompt = [input.description], glowing decorative halloween lights, spooky string lights in the shape of ghosts and pumpkins, volumetric light, dark background, photorealistic, bokeh
+        negative = [input.negative], drawing, 2d, illustration
+      Neon Noir
+        prompt = [input.description], neon noir style, moody lighting, rainy streets, glowing signs, cyberpunk atmosphere, dark blues, purples, and vibrant neons
+        negative = [input.negative], cartoon, drawing, 2d, 3d render, anime, illustration, bright sunlight, cheerful, overly colorful
+      Haunted House Atmosphere
+        prompt = [input.description], haunted house atmosphere, eerie glow, shadows, moonlight through windows, mist, decaying grandeur, sepia tones with hints of dark red and green
+        negative = [input.negative], bright, cheerful, modern, clean, cartoon, anime, vibrant colors
+      Dreamy Pastel
+        prompt = [input.description], dreamy pastel colors, soft focus, ethereal lighting, whimsical, gentle gradients, light pinks, blues, yellows, and purples
+        negative = [input.negative], dark, harsh, realistic, sharp, cartoon, anime, strong shadows
+      Gothic Cathedral Stained Glass
+        prompt = [input.description], gothic cathedral stained glass effect, intricate patterns, jewel tones, light filtering through colored glass, dramatic shadows
+        negative = [input.negative], cartoon, drawing, 2d, 3d render, anime, illustration, blurry, low detail, modern art
+      Cinematic Lighting
+        prompt = [input.description], cinematic lighting, dramatic shadows, volumetric light, professional photography, film grain, deep rich colors, golden hour, blue hour
+        negative = [input.negative], flat lighting, cartoon, drawing, 2d, 3d render, anime, illustration, blurry, low quality
+      Spooky Silhouettes
+        prompt = [input.description], spooky silhouettes against a dramatic sky, atmospheric perspective, limited color palette, high contrast, eerie
+        negative = [input.negative], detailed faces, bright, cheerful, cartoon, anime, clear features
+      Vibrant Halloween Night
+        prompt = [input.description], vibrant Halloween night, glowing pumpkins, festive lights, deep oranges, purples, and greens, playful spooky elements, misty
+        negative = [input.negative], scary, gory, black and white, cartoon, anime, bright daylight
+      Dark Academia Aesthetic
+        prompt = [input.description], dark academia aesthetic, dim lighting, old books, antique furniture, muted tones, sepia, deep greens, burgundies, and browns
+        negative = [input.negative], bright, modern, colorful, cartoon, anime, futuristic
+      Mystical Forest Glow
+        prompt = [input.description], mystical forest glow, bioluminescent plants, glowing moss, enchanting, magical lighting, deep blues, purples, and soft greens
+        negative = [input.negative], urban, modern, harsh light, cartoon, anime, realistic
+      Pumpkin Patch Night
+        prompt = [input.description], nighttime pumpkin patch aglow with carved jack-o-lanterns, mist rising from the ground, rustic wooden fences, children in costumes, magic in the air, rich oranges and deep shadows, cozy, enchanted
+        negative = [input.negative], cartoon, realistic photograph, bright daylight, modern objects, blurry
+      Witch’s Cottage Interior
+        prompt = [input.description], inside a charming witch's cottage, bubbling cauldron, candlelit shelves of potions, dried herbs hanging from the ceiling, spellbooks, mystical glow, whimsical, homey chaos
+        negative = [input.negative], modern appliances, bright daylight, science fiction, digital screens
+      Skeleton Rave
+        prompt = [input.description], energetic skeletons dancing under neon lights, blacklight glow, Halloween rave party, vibrant, surreal, electric atmosphere
+        negative = [input.negative], realistic humans, daylight, photorealistic, muted colors
+      Haunted Carnival
+        prompt = [input.description], eerie abandoned carnival at dusk, cracked painted rides, ghostly figures, faded banners fluttering, spectral midway, gloomy yet playful
+        negative = [input.negative], bright cheerful, crowded modern carnival, digital effects
+      Jack-o’-Lantern Portrait
+        prompt = [input.description], stylized jack-o-lantern as a detailed character portrait, expressive carved face, glowing from within, dramatic lighting, autumn leaves background
+        negative = [input.negative], realistic human features, modern props, digital overlays
+      Trick-or-Treat Parade
+        prompt = [input.description], group in elaborate costumes trick-or-treating under glowing street lamps, bags full of candy, cozy neighborhood, autumn leaves, moon overhead
+        negative = [input.negative], modern police, cars, daylight, sparse background, horror
+      Candy Corn Fantasy
+        prompt = [input.description], whimsical landscapes inspired by candy corn, orange, yellow, white hills, giant candy pieces as trees, magical night sky
+        negative = [input.negative], realistic landscapes, muted colors, humans, photorealism
+      Graveyard Fog
+        prompt = [input.description], ancient graveyard covered in heavy fog, crooked tombstones, shadowy crypts, moonlight, ghostly silhouettes, atmospheric horror
+        negative = [input.negative], daylight, modern graves, cartoon, blood, gore
+      Masquerade Ball
+        prompt = [input.description], lavish masquerade ball with ornate masks, candlelit chandeliers, elegant gowns and suits, dark romantic ambiance, gothic palace
+        negative = [input.negative], modern party, carnival, daylight, casual clothing
+      Cemetery Angel
+        prompt = [input.description], elegant stone angel in overgrown cemetery, wings spread, gothic sculpture, moss, dusk, ethereal beauty, haunting solitude
+        negative = [input.negative], cartoon, clean modern cemetery, bright lighting
+      Pumpkin Patch Enchantment
+        prompt = [input.description], moonlit pumpkin patch, carved jack-o-lanterns glowing, thick mist swirling above the ground, autumn leaves, mysterious shadows, magical atmosphere
+        negative = [input.negative], daytime, modern props, city, cartoon
+      Witch’s Parlor
+        prompt = [input.description], cozy witch’s parlor, bubbling cauldron, flickering candles, jars of potions, spell books, black cat curled on windowsill, enchanted, mystical, old-fashioned
+        negative = [input.negative], modern appliances, TV, bright sunlight, sci-fi
+      Bats in Twilight
+        prompt = [input.description], flock of bats flying at twilight, dramatic sky, silhouetted trees, gothic mood, orange and purple hues
+        negative = [input.negative], daylight, crowded city, cheerful, cartoon
+      Candy Corn Landscape
+        prompt = [input.description], fantastical landscape inspired by candy corn, rolling hills in white, orange, and yellow, surreal, whimsical, magical night sky
+        negative = [input.negative], photorealism, humans
+      Coven Gathering
+        prompt = [input.description], witches circling a blazing bonfire in the forest at night, shadowy forms, sparks rising, ominous glowing eyes, ritual magic
+        negative = [input.negative], city, cartoon, sci-fi
+      Skeleton Dance Rave
+        prompt = [input.description], skeletons dancing under neon blacklight, vivid splashes of color, Halloween party, spooky joy, surreal energy
+        negative = [input.negative], realistic humans, daylight, muted colors
+      Nightmare Before Christmas Tribute
+        prompt = [input.description], Nightmare Before Christmas style, swirly hills, spooky trees, whimsical gothic, Halloween meets Christmas, Tim Burton influence
+        negative = [input.negative], simple backgrounds, bright cheerful
+      Queer Halloween Ball
+        prompt = [input.description], flamboyant queer Halloween masquerade, elaborate costumes, drag witches and warlocks, disco jack-o-lantern lights, extravagant and fabulous
+        negative = [input.negative], drab, casual, single-color, minimalism
+      Ghostly Trick-or-Treaters
+        prompt = [input.description], group of ghostly children trick-or-treating, flowing white sheets, glowing lanterns, foggy streets, vintage Halloween vibes
+        negative = [input.negative], modern street signs, realism, digital effects
+
+      // --- NSFW STYLES ---
+      naked 40yo masculine bodybuilder
+        prompt = [input.description]studio lighting, Highly detailed photo of a naked 40yo masculine man, (full body shot), ( GS-Masculine:1.1), (large erect penis1.2), (testicles), HairyAlpha, 3/4 angle, (buzzcut:1.2), sitting in an indoor pool, legs spread open, (dark atmosphere:1.1), burly, beard, bushy mustache, tanned skin, (dim lighting), (white tiles), modern indoor pool, backroom, liminal space, wet skin, (legs in water), (extreme body hair:1.2), big muscular thighs, relaxed pose, (handsome face), <lora:HairyAlpha:1> <lora:muscle_slider_v1:4> <lora:adam_TGIRL_e16_n32:.6>, hairy arms, hairy legs, hairy armpits, hairy pubes
+        negative = [input.negative]GS-DeFeminize-neg:1.3, smile, Unspeakable-Horrors-Composition-4v, low angle, BadDream UnrealisticDream JuggernautNegative-neg bad-hands-5, pants, two penises, cross eyed
+      Public Shower
+        prompt = [input.description], multiple hairy men in a steamy public shower, highly detailed photo, water droplets on skin, mens ass, suggestive glances, cinematic lighting, detailed flaccid hanging penises, photoreal photo of pubic shower
+        negative = [input.negative], female, clothed, unrealistic, blurry, cartoon, child, deformed
+      After the Match
+        prompt = [input.description], post-game locker room, two hairy sweaty athletes, hairy chests, towels around their waists, homoerotic tension, steam rising from the showers
+        negative = [input.negative], female, clothed, unrealistic, blurry, cartoon, child, deformed
+      Toga Party
+        prompt = [input.description], ancient Roman toga party, two men in revealing togas, hairy bodies, hairy chests, pubes, reclining on couches, feeding each other grapes, intimate whispers, soft candlelight, one
+        negative = [input.negative], female, modern clothing, cartoon, child
+      Forbidden Library
+        prompt = [input.description], late at night in a grand library, two scholars, unbuttoned shirts, hairy chests, passionate kissing, glasses, hard penis sticking out of slacks, sloppy blowjob, one reaching for a book on a high shelf, the other steadying him from behind, their hands touch, intense eye contact, penis, hairy chests, unbuttoned shirt
+        negative = [input.negative], female, bright lighting, modern library, cartoon, child
+      Artist's Muse
+        prompt = [input.description], an artist's studio, a handsome male model posing nude for a painting, pubic bushy, the artist's intense gaze on his subject, detailed soft penis and balls, charcoal sketches scattered on the floor
+        negative = [input.negative], female, clothed, unrealistic, blurry, cartoon, child, deformed
+      Naked Male
+        prompt = [input.description], hyperrealistic naked male with hairy body, (((hairy chest))), hairy stomach, hairy arms, hairy legs, hairy pubes, The penis is impressive, It has a girthy shaft that's well-defined and covered in thick veins , The head is and penis is perfect shaped, The color of the penis is a healthy skin tone , The testicles are large and full and hang low and are covered in a thick layer of pubic hair, The base of the shaft is adorned with a generous amount of pubic hair that adds to the overall masculine and rugged appeal
+        negative = [input.negative], [commonNsfwNegative], small penis, deformed penises, double penises on one man, no penis, half penis, clit, transgender
+      Naked Male (NSFW)
+        prompt = [input.description], hyperrealistic naked male with hairy body, (((hairy chest))), hairy stomach, hairy, masculine and rugged appeal
+        negative = [input.negative]
+      Gay Facial (NSFW)
+        prompt = [input.description],man, extreme close up on face, (lots of thick stringy white ((cum on face))), eyes {closed^3.0|squinting}
+        negative = [input.negative], [commonNsfwNegative], small penis, deformed penises, double penises on one man, no penis, half penis, clit, transgender
+      HyperCum
+        prompt = [input.description], gay, men (bukkake, cumshot, cum on face, cum on chest, cum on body, cum on clothing, dripping cum, covered in cum)
+        negative = [input.negative], [commonNsfwNegative], small penis, deformed penises, double penises on one man, no penis, half penis, clit, transgender
+      Homoerotic (NSFW)
+        prompt = [input.description], homoerotic, naked men, detailed penis, uncut penis, circumsized penis, hairy pubes, erect dick, photoreal, handsome, hyper-realistic, detailed testicles,
+        negative = [input.negative], [commonNsfwNegative], small penis, deformed penises, double penises on one man, no adidas, clit, transgender
+      Homoerotic realism (NSFW)
+        prompt = [input.description], highly detailed photo, hyperrealistic men with detailed penises, shallow focus, shiny, glossy, reflective, 8k uhd, soft lighting, high quality, film grain, Fujifilm XT3
+        negative = [input.negative], unrealistic skin, deformed penis, small penis, double penis, transgender
+      Naked Male Tank Top
+        prompt = [input.description] highres, score_9, score_8_up, realistic, highly detailed, realistic eyes, intricate details, detailed background. photo of a handsome Irish man, 35 yo, beard, skinny, hairy chest, wearing a thin white tank top, , no pants, (((flaccid penis))), thick red pubic hair, soft penis, limp penis, testicles, loose testicles, sitting on bed by the window, cowboy shot, medium shot, detailed face, detailed eyes, depth of field, dynamic poses, dynamic angle. indoors, bedroom, sunrays
+        negative = [input.negative] ogo, watermark, pants, shorts, bara, hyper muscle, child, vagina, girly, girl, woman, feminine, ((((erection, erect penis, hard penis)))), defined abs
+      Nude Male
+        prompt = [input.description] highly detailed photo, A naked male, full body shot, penis, visible penis, natural light, private plane, dynamic pose, Think about how relocating the furniture to resolve placement issues and how relocating the human body to avoid placement issues with furniture around, Proportions and size and distances between all elements are harmonious
+        negative = [input.negative] Asian, manga, CGI, 3D, muscular, damaged face, ugly eyes, tall person, broken limbs, unrealistic, female vulva, deformities
+      Ancient Roman
+        prompt = [input.description], ancient roman men with hairy chests, rugged, sexy ancient roman soldier attire, masculine, loin cloths, togas, revealing, gladiator
+        negative = [input.negative], unrealistic skin
+      Prison Cellmate Seduction (NSFW)
+        prompt = [input.description](masterpiece), 2 prison trash men, rugged, hairy chests, tattoos, shirtless, prison orange boxers, shared bunk bed, whispers, sexual tension, realistic
+        negative = [input.negative]
+      Military Barracks Night (NSFW)
+        prompt = [input.description] 2 military men, rugged, camo, unbuttoned shirt, hairy chest, sunglasses, photo real, detailed penis
+        negative = [input.negative]
+      Roman Bath Encounter
+        prompt = [input.description], 2 ancient roman men, hairy chests, rugged, hairy legs, togas off, marble bathhouse, misty air, intimate conversation, historical realism
+        negative = [input.negative]
+      Dadbod running (NSFW)
+        prompt = [input.description] middle-aged, 45yo, muscular, handsome, rounded belly, (((dad bod, rounded belly))), (((pubic hair, pubes, hairy))), ((naked, circumcised large flaccid penis)), ((((large testicles)))), wearing running shoes, socks, baseball cap, sweaty skin, extremely realistic, full-body pose, full body view, outside, public park, paved path, sunlight, dynamic angle, (jogging, running)
+        negative = [input.negative] safe_neg, BadDream, UnrealisticDream, EpicMix-AntiLady, ((inverted nipples)), visible abs
+      Man
+        prompt = [input.description] highly detailed photo, man, handsome, (((hairy body))), (((pubic hair, pubes, hairy))), ((naked, circumcised detailed penis)), ((((testicles)))), extremely realistic, full-body pose, extremely detailed penis and testicles, full body view, dynamic angle,
+        negative = [input.negative] safe_neg, BadDream, UnrealisticDream, EpicMix-AntiLady, ((inverted nipples)), ((deformed penis)), ((vagina)), ((clitoris)), ((female))
+      Shower Confidence
+        prompt = [input.description], naked man showering in minimalist bathroom, wet hairy chest and body, water streaming down defined abs, relaxed expression, body acceptance, steamy, clean, wet pubes, flaccid penis and balls
+        negative = [input.negative], bad photo, clothed, sadness, crowd, cluttered
+      Golden Hour Nude
+        prompt = [input.description], naked man standing in natural landscape during golden hour, sun casting warm glow on bare skin, confident pose, body highlighted, peaceful atmosphere, artistic nudity, hairy chest, hairy body, pubes, penis and balls
+        negative = [input.negative], clothed, dark lighting, women, sadness, cartoon
+      Forest Orgy
+        prompt = [input.description], naked men participating in explicit orgy in secluded forest clearing, erect cocks, passionate group interaction, mossy ground, moonlight, bodies entwined
+        negative = [input.negative], bad photo, clothed, women, violence, blood
+      Hairy men
+        prompt = [input.description], highly detalied photo, hairy men, hairy chest, hairy body, photo, no shirt, shirtless, dad, hairy pubes, photorealistic, hyperrealistic, thin shorts or underwear or jockstrap or jeans or gym shorts or a towel, long socks, boots or no shoes or skater shoes or addidas, leather or no leather, harness
+        negative = [input.negative], women, poor quality, deformed, clitoris, unrealistic skin
+      NSFW - Hyperrealistic Men
+        prompt = [input.description], highly detailed photo, highly realistic, realistic portrait, (nsfw), anatomically correct, detailed penis, realistic photograph, real colors, award winning photo, detailed face, realistic eyes, beautiful, sharp focus, high resolution, volumetric lighting, incredibly detailed, masterpiece, breathtaking, exquisite, great attention to skin and eyes, penis, detailed penis, detailed testicles, hairy testicles, hairy body
+        negative = [input.negative], unrealistic, animated, 3d, sketches, (text), low-quality, deformed, extra limbs, blurry, bad art, (logo), watermark, blurred, cut off, extra fingers, bad quality, distortion of proportions, deformed fingers, elongated body, cropped image, deformed hands, deformed legs, deformed face, twisted fingers, double image, detailed neck, extra limb, plastic, disfigured, mutation, sloppy, ugly, pixelated, bad hands, aliasing, overexposed, oversaturated, burnt image, fuzzy, poor quality, deformed arms
+      Locker Room Encounter (NSFW)
+        prompt = [input.description], masterpiece, (two handsome hairy athletic men), post-workout, (steamy locker room), low-hanging towels, pubic hair, naked men in background changing clothes, penies visible, droplets of water on skin, muscular definition, homoerotic tension, (suggestive glances), photorealistic, detailed bodies, cinematic lighting
+        negative = [input.negative], [commonNsfwNegative], clothed
+      Gay Bar Cruising (NSFW)
+        prompt = [input.description], dimly lit gay bar, two men making eye contact, neon lights, leather jackets, jeans, sexual tension, moody atmosphere, photorealistic, film grain, ((subtle cruising)), rugged hairy men, cigars, men fucking eachother
+        negative = [input.negative], [commonNsfwNegative], bright lighting, empty bar
+      Bear & Cub Affection (NSFW)
+        prompt = [input.description], (large burly hairy man:1.2), (younger slender man:1.1), beefy man, muscular embrace, affectionate, hairy chests, beards, contrast in body types, cozy setting like a cabin or bedroom, warm lighting, hyperrealistic
+        negative = [input.negative], [commonNsfwNegative], no body hair, skinny men only
+      Twink Pool Party (NSFW)
+        prompt = [input.description], group of young 18 year old men, twinks, ((slender, hairless men)), twinks, poolside, bright sunlight, wet skin, speedos, (playful interaction), hard cocks, erections visible through wet fabric, vibrant colors, photorealistic, high-resolution
+        negative = [input.negative], [commonNsfwNegative], hairy men, muscular men, dark, indoor
+      Jockstrap Worship (NSFW)
+        prompt = [input.description], (sailors man in a jockstrap:1.3), pubes, close-up on bulging crotch, another man kneeling, face close to the jockstrap, worshipful expression, detailed fabric texture, sweat, intense lighting, hyperrealistic
+        negative = [input.negative], [commonNsfwNegative], no jockstrap, clothed, far shot
+      Sailor's Lust (NSFW)
+        prompt = [input.description], (two rugged hairy sailors on ship deck:1.2), vintage sailor uniforms, (torn shirts revealing hairy chests), rough embrace, crashing waves in background, salty air, passionate, dramatic lighting, homoerotic art by Tom of Finland style
+        negative = [input.negative], [commonNsfwNegative], modern clothing, calm sea
+      Office Affair (NSFW)
+        prompt = [input.description], (two men in business suits:1.1), dress socks, late night in the office, penis sticking out of slacks, one man leaning over the other's desk, (unbuttoned shirts, hairy chest, loosened ties), homoerotic tension, shadows, desk lamp as only light source, photorealistic, cinematic
+        negative = [input.negative], [commonNsfwNegative], casual clothing, daytime, bright office
+      Leather Daddy (NSFW)
+        prompt = [input.description], (older hairy NSFW man in full leather gear:1.3), hard penis, harness, chaps, (rugged man), boots, (younger man kneeling before him), BDSM aesthetic, dog, chains, dark, moody lighting, hyperrealistic
+        negative = [input.negative], [commonNsfwNegative], no leather, casual clothing, bright
+      Public Restroom Hookup (NSFW)
+        prompt = [input.description], (two men in a public restroom stall:1.2), one man pressed against the wall, the other kneeling, (graphic oral sex), graffiti-covered walls, harsh fluorescent lighting, hyperrealistic, gritty
+        negative = [input.negative], [commonNsfwNegative], clean restroom, bright
+      Gloryhole Surprise (NSFW)
+        prompt = [input.description], (anonymous encounter), man's face on one side of a dirty bathroom stall wall, another man's (large erect penis) through a hole in the wall, mouth open and ready, grimy setting, intense anticipation, realistic, high detail on facial expression and penis
+        negative = [input.negative], [commonNsfwNegative], clean bathroom, romantic, full body shot of both men
+      Leather Bar Domination (NSFW)
+        prompt = [input.description], (two men in full leather gear:1.3), leather bar scene, harnesses, chaps, bulldog harness, one man in a dominant posture over the other, aggressive, sweaty bodies, chains, dim red and blue lighting, hypermasculine, gritty, photorealistic, style of Tom of Finland
+        negative = [input.negative], [commonNsfwNegative], soft lighting, no leather, vanilla, smiling, cute
+      Ranch Hand Rendezvous (NSFW)
+        prompt = [input.description], (two rugged cowboys in a hayloft), shirtless, sweaty, wearing dusty jeans, one man's jeans unbuttoned revealing ((hairy pubes and a thick, hard cock)), golden hour sunlight streaming through barn slats, intense sexual tension, hyperrealistic, masterpiece
+        negative = [input.negative], [commonNsfwNegative], clean setting, modern clothes, feminine
+      Gym Bro's Secret (NSFW)
+        prompt = [input.description], two muscular gym bros in an empty locker room after a workout, one spotting the other on a bench, (intense, lingering eye contact that's more than friendly), homoerotic subtext, post-workout sweat, ((obvious bulges visible in their gym shorts)), realistic, high detail, cinematic
+        negative = [input.negative], [commonNsfwNegative], explicit sex, unrealistic muscles
+      Gamer Boyfriends' Distraction (NSFW)
+        prompt = [input.description], two handsome young men in a dimly lit bedroom, blow job, illuminated by the glow of a computer monitor, (one man leans over to kiss the other, controller dropped on the floor), homoerotic, intimate, ((obvious bulge in sweatpants)), gaming posters on the wall, realistic, cinematic lighting, cozy atmosphere
+        negative = [input.negative], [commonNsfwNegative], bright room, clothed formally
+      Mechanic's Tune-Up (NSFW)
+        prompt = [input.description], (two rugged hairy mechanics in a grimy auto shop:1.2), covered in grease and sweat, one man pinned against a classic car, (the other's hand sliding down his unzipped coveralls), intense lustful gaze, tools scattered, hyperrealistic, dramatic shadows, masterpiece
+        negative = [input.negative], [commonNsfwNegative], clean setting, fully clothed
+      Roman Bathhouse Seduction (NSFW)
+        prompt = [input.description], (two powerful Roman hairy legionaries in a marble bathhouse:1.2), steam rising from the water, chiseled wet bodies, one man washing the other's back, ((hands lingering sensually on his ass)), erections visible beneath the water's surface, homoerotic, style of a classical oil painting, hyperrealistic, many naked men in background
+        negative = [input.negative], [commonNsfwNegative], modern setting, clothes
+      Firehouse Hose Down (NSFW)
+        prompt = [input.description], two hypermasculine hairy firefighters in a station shower room, (soot-stained muscular bodies), water spraying everywhere, one firefighter bent over a bench, ((the other fucking him from behind)), gripping his hips, intense expressions of pleasure, gritty, photorealistic, high-resolution, hairy firefighters with hats and no other clothing in background
+        negative = [input.negative], [commonNsfwNegative], fire, uniforms on, soft, romantic
+      Vampire's Kiss (NSFW)
+        prompt = [input.description], (a pale, aristocratic vampire lord:1.2) pinning a handsome young man to a velvet chaise lounge, (biting his neck passionately), eyes glowing red, gothic library setting, moonlight through a large window, homoerotic, dark fantasy art, hyperrealistic, detailed clothing and fangs
+        negative = [input.negative], [commonNsfwNegative], sunlight, modern setting, smiling
+      Construction Site Break (NSFW)
+        prompt = [input.description], two sweaty hairy construction workers taking a break in an unfinished building, (one man kneeling in front of the other), hard hat on the ground, ((graphic oral sex)), dusty air, sunlight streaming through exposed beams, gritty, realistic, high detail on muscular bodies
+        negative = [input.negative], [commonNsfwNegative], clean, office setting, fully clothed
+      Professor's Office Hours (NSFW)
+        prompt = [input.description], (a handsome, tweed-wearing professor:1.1) and his male student in a book-lined office after hours, the 18 year old student is bent over the professor's desk, ((ass exposed, being spanked with a leather-bound book)), expressions of discipline and pleasure, desk lamp providing sole illumination, cinematic, photorealistic
+        negative = [input.negative], [commonNsfwNegative], bright lighting, classroom, gore
+      Gym Mirror Reflection (NSFW)
+        prompt = [input.description], large gym mirror, reflection of two men working out, hairy chests, small thin seethrough gym shorts, one man noticing the other's bulge, (suggestive glance), muscle definition, sweat, mirrors creating multiple reflections, cinematic lighting, photorealistic
+        negative = [input.negative], [commonNsfwNegative], empty gym, close-up shots
+      Jacuzzi Hot Spot (NSFW)
+        prompt = [input.description], two men in a bubbling hot tub, dim lighting, steam rising from the water, subtle post-workout steam, muscular chests glistening, intense eye contact, photorealistic, moody, intimate setting
+        negative = [input.negative], [commonNsfwNegative], bright lighting, indoor, clothed
+      Shower Room Blowjob (NSFW)
+        prompt = [input.description], two men in a shower room, one man pressed against the wall, the other on his knees, (graphic oral sex), steamy environment, water droplets, muscular physique, intense facial expressions, hyperrealistic
+        negative = [input.negative], [commonNsfwNegative], clean, bright
+      Truck Stop Meet (NSFW)
+        prompt = [input.description], two hairy rugged truckers in a rest area, one leaning against his vehicle, intense eye contact, (suggestive stance), gritty setting, neon signs, dramatic lighting, realistic, high contrast
+        negative = [input.negative], [commonNsfwNegative], clean, bright, smiling
+      Park Bench Tryst (NSFW)
+        prompt = [input.description], secluded park bench, two men sitting close, one man's hand on the other's thigh, (subtle cruising), warm sunset light, shadows, discreet yet charged atmosphere, photorealistic, natural lighting
+        negative = [input.negative], female, bright daytime, indoor, cartoon, child, clothed
+      BDSM Chamber (NSFW)
+        prompt = [input.description], dimly lit BDSM dungeon, two hairy men in leather gear, dominant and submissive roles, whips and chains, moody lighting, sweat, hyperrealistic
+        negative = [input.negative], [commonNsfwNegative], bright, smiling, candlelit
+      Naked Men Group
+        prompt = [input.description], many naked hairy men, large group of attractive men with no clothes, pubes, detailed penises, multiple nude men, hyperrealistic, nsfw, explicit
+        negative = [input.negative], [commonNsfwNegative], bright, smiling
+      Explicit Gay Scene
+        prompt = [input.description], explicit gay sex scene, hairy men naked, detailed penises, men fucking, gay sex, cum, orgasm, rough hardcore sex, taboo, hardcore gay sex, bareback gay sex, trashy, piss, moody lighting, sweat, hyperrealistic, sloppy blow job
+        negative = [input.negative], [commonNsfwNegative], bright, smiling, candlelit
+      Bareback Passion (NSFW)
+        prompt = [input.description], masterpiece, photorealistic scene of two men engaged in passionate bareback anal sex, one man gripping the other's hips, faces showing intense pleasure, sweaty bodies glistening, detailed muscular definition, cinematic lighting, shot on Sony A7 III, hyperrealistic skin texture
+        negative = [input.negative], [commonNsfwNegative]
+      Mutual Worship (69) (NSFW)
+        prompt = [input.description], hyperrealistic close-up shot of two men in a 69 position, engaged in mutual oral sex, detailed erect penises, expressions of ecstasy, entwined bodies, warm indoor lighting, shallow depth of field, photorealistic, cinematic feel
+        negative = [input.negative], [commonNsfwNegative], clothed, far shot
+      Threesome Entanglement (NSFW)
+        prompt = [input.description], masterpiece, explicit and photorealistic scene of a passionate threesome, three handsome hairy men, entangled bodies on a large bed, multiple sex acts occurring simultaneously, expressions of lust and pleasure, sweaty skin, dramatic shadows from a single light source, hyper-detailed, cinematic
+        negative = [input.negative], [commonNsfwNegative], more than three people, less than three people, clothed, floating limbs
+      Rimming (NSFW)
+        prompt = [input.description], explicit masterpiece, extreme close-up, hyperrealistic photo of a man rimming another, face buried deep in spread ass cheeks, detailed tongue and anus, gritty and raw atmosphere, intense focus, realistic skin texture, photorealistic
+        negative = [input.negative], [commonNsfwNegative], clothed, vanilla, romantic, far shot
+      Cumshot (NSFW)
+        prompt = [input.description], explicit masterpiece, hyperrealistic close-up photo of a man ejaculating, thick ropes of cum shooting out, detailed penis and testicles, intense expression of orgasm, dramatic lighting, photorealistic, cinematic, shot on Canon EOS R5
+        negative = [input.negative], [commonNsfwNegative], clothed, vanilla, romantic, far shot
+      Artistic B&W Nude (NSFW)
+        prompt = [input.description], masterpiece, high-contrast black and white studio photograph of a naked man, style of Herb Ritts, dramatic chiaroscuro lighting, highlighting muscle definition and form, powerful and artistic pose, intense gaze, impeccable detail, fine art nude photography, realistic skin texture
+        negative = [input.negative], color, blurry, flat lighting, painting, cartoon, 3d, deformed, busy background, text, watermark
+      Morning Light (NSFW)
+        prompt = [input.description], masterpiece, photorealistic DSLR photo of a handsome naked man in his bedroom, early morning light streaming through a window, soft shadows, relaxed natural pose on an unmade bed, detailed skin texture, hairy body, soft penis and balls visible, film grain, style of Kodak Portra 400
+        negative = [input.negative], [commonNsfwNegative], erection, harsh lighting, unrealistic body, sterile, bright white room
+      Forest Retreat (NSFW)
+        prompt = [input.description], award-winning nature photograph of a rugged, hairy naked man in a secluded sun-dappled forest, standing near a clear stream, natural light filtering through the canopy, realistic skin texture with dirt and sweat, confident and relaxed pose, hyperrealistic, cinematic, shot on Canon EOS R5
+        negative = [input.negative], indoors, clothing, buildings, cartoon, 3d render, unrealistic, deformed, extra limbs, sterile, clean
+      Candid Boyfriend (NSFW)
+        prompt = [input.description], candid, intimate photograph of a handsome naked man lounging on a sofa, as if taken by his partner, warm indoor lighting, laughing with a natural expression, messy hair, shallow depth of field, feels like a real captured moment, hyperrealistic skin details, shot on a smartphone
+        negative = [input.negative], posed, studio lighting, perfect hair, 3d, cartoon, painting, sad, sterile environment, model, photoshoot
+      Gay Romance Novel Cover
+        prompt = [input.description], two handsome men embracing passionately, soft focus, warm lighting, romantic atmosphere, style of a gay romance novel cover, photorealistic, detailed faces and hands, emotional connection
+        negative = [input.negative], explicit nudity, graphic sex, cartoon, anime, 3d render, deformed, extra limbs, text, watermark
+      Tom of Finland Tribute
+        prompt = [input.description], hypermasculine men in leather, exaggerated muscles, confident poses, style of Tom of Finland
+        negative = [input.negative]
+      // --- IMPORTED STYLES ---
+      meta:import
+        from = {import:t2i-styles}
+      meta:import
+        from = {import:vionet20-t2i-styles-importable}
+
+    shape
+      label = shape
+      type = select
+      remember = true
+      options
+        Portrait = 512x768
+        Square = 512x512
+        Landscape = 768x512
+
+    lighting
+      label = lighting
+      type = select
+      remember = true
+      options
+        No Preference
+        Cinematic Lighting = cinematic lighting, volumetric lighting
+        Studio Lighting = professional studio lighting, soft shadows
+        Golden Hour = golden hour, soft, warm light
+        Neon Glow = neon lighting, cyberpunk aesthetic, vibrant glow
+        Volumetric Crepuscular Rays = god rays, volumetric crepuscular rays
+        Eerie Glow = eerie glow, unsettling light, dark ambiance
+        Backlight = rim lighting, silhouette, backlight
+        Dark, Moody = dim lighting, moody atmosphere, low key
+
+    color
+      label = color
+      type = text
+      remember = true
+      examples
+        vibrant, multicolored
+        dark red and black
+        monochromatic blue
+        pastels
+        earth tones
+
+    numImages
+      label = # of images
+      type = select
+      remember = true
+      options
+        6 = 6
+        9 = 9
+        12 = 12
+        3 = 3
+
+  defaultCommentOptions
+    width = 50%
+    height = 400
+    commentPlaceholderText = Please comment!
+    submitButtonText = submit comment
+    bannedUsers = [bannedUsersList]
+    adminFlair = NERO
+    deleteButtonIcon = X
+    adminPasswordHash = 852250ec8c25104af2f5f4536f183d7aa04f13b5d7dcae3308346bb59a19dd26
+
+  commentChannels
+    general
+      label = General
+    chat1
+      label = Chat Room
+    chat2
+      label = Chat with NERO
+    chat3
+      label = NSFW Room
+    prompts
+      label = >>Prompt Suggestions<<
+      commentPlaceholderText = Share a cool prompt/style. If it's good, it may get added to the Art Style selector.
+      submitButtonText = share prompt
+
+  galleryOptions
+    gallery = true
+    sort = trending
+    hideIfScoreIsBelow = 1
+    adaptiveHeight = true
+    contentFilter = none
+
+  showFeedback = true
+
+// This is just a fallback, your better random prompt generator is at the top of the code
+randomDescription = [randomSubject] [randomAction] [randomSetting]
+
+animal
+  cat
+  dog
+  wolf
+  fox
+  tiger
+  lion
+  panther
+  horse
+  eagle
+  falcon
+  owl
+  raven
+  dragon
+  unicorn
+  griffin
+  phoenix
+  shark
+  dolphin
+  octopus
